@@ -5,6 +5,7 @@ from plots.plot import Plot
 
 app.layout = html.Div(children=[
     dcc.Store('df'),
+    dcc.Store('df_start_date', data=None),
     html.H1(children='Hello Dash'),
     html.Div(children='''
         Dash: A web application framework for your data.
