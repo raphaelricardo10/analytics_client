@@ -24,11 +24,12 @@ class BigQueryClient:
         self.project_id = project_id
         self.dataset = dataset
 
-    def select(self, table: str, columns: "list[str]" = "*", limit=1000, to_df=True):
+    def select(self, table: str, columns: "list[str]" = "*", limit=1000, start_date = None, to_df=True):
         query = f"""\
             SELECT {','.join(columns)}\
             FROM {self.dataset}.{table}\
-            ORDER BY ts DESC\
+            {f"WHERE ts > '{start_date}'" if start_date else ''}\
+            ORDER BY ts ASC\
             {f"LIMIT {limit}" if limit else ''}\
         """
 
