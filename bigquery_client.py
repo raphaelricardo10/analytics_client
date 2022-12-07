@@ -28,6 +28,7 @@ class BigQueryClient:
         query = f"""\
             SELECT {','.join(columns)}\
             FROM {self.dataset}.{table}\
+            ORDER BY ts DESC\
             {f"LIMIT {limit}" if limit else ''}\
         """
 
