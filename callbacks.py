@@ -1,8 +1,10 @@
 import os
+import pandas as pd
 
 from app import app
-from dash import Output, Input
+from dash import Output, Input, State, no_update
 
+from decoders import decode_dataframe
 from bigquery_client import BigQueryClient
 from plots.temperature_plot import TemperaturePlot
 
@@ -15,14 +17,26 @@ bq_client = BigQueryClient(
 
 @app.callback(
     Output(component_id="df", component_property="data"),
+    Output(component_id='df_start_date', component_property='data'),
+    State(component_id="df", component_property="data"),
+    State(component_id='df_start_date', component_property='data'),
     Input(component_id="interval-component", component_property="n_intervals"),
 )
-def update_df(df):
-    return (
-        bq_client.select("multisensor_data", to_df=True)
-        .drop_duplicates()
-        .to_json()
-    )
+def update_df(df, start_date, _):
+    df = decode_dataframe(df)
+    
+    new_df = bq_client.select(
+        "multisensor_data", start_date=start_date, to_df=True
+    ).drop_duplicates()
+
+    start_date = new_df.ts.max()
+
+    if df is None:
+        return new_df.to_json(), start_date
+        
+    df = pd.concat([df, new_df], join="inner", ignore_index=True)
+
+    return df.to_json(), start_date
 
 
 @app.callback(
@@ -30,4 +44,8 @@ def update_df(df):
     Input(component_id="df", component_property="data"),
 )
 def update_temperature_plot(df):
+    if df is None:
+        return no_update
+
+    df = decode_dataframe(df)
     return temperature_plot.figure(df)
