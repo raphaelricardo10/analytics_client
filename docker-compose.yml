@@ -9,5 +9,12 @@ services:
     env_file:
       - .env
 
+  sensor:
+    image: sensor:latest
+    volumes:
+      - ~/.config/gcloud:/root/.config/gcloud
+    env_file:
+      - .env
+
 networks:
   webnet:
