@@ -14,7 +14,11 @@ class Plot(ABC):
 
     @staticmethod
     def empty_plot() -> go.Figure:
-        return go.Figure(data=[go.Scatter(x=[], y=[])])
+        fig = go.Figure(data=[go.Scatter(x=[], y=[])])
+
+        fig.update_layout(template='plotly_dark')
+
+        return fig
 
     @staticmethod
     def _basic_figure() -> go.Figure:
