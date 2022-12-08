@@ -33,7 +33,7 @@ dynamic_callback = app.callback if platform == 'darwin' else app.long_callback
 )
 def update_df(df, start_date, _):
     df = decode_dataframe(df)
-    limit = 500 if df is not None else 3000
+    limit = 500 if df is not None else None
 
     new_df = bq_client.select(
         os.getenv('BQ_TABLE'), start_date=start_date, to_df=True, limit=limit
