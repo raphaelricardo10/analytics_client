@@ -2,33 +2,39 @@ import pandas as pd
 from plots.plot import Plot
 import plotly.express as px
 import plotly.graph_objects as go
+from plotly.subplots import make_subplots
 
 
 class TemperaturePlot(Plot):
     @staticmethod
     def figure(df: pd.DataFrame) -> go.Figure:
-        figs = TemperaturePlot.plot_all_devices(df)
 
-        return TemperaturePlot.join_plots(figs)
+        fig = go.Figure()
+        fig.update_layout(
+            template="plotly_dark",
+            showlegend=True,
+            title="Temperature in last hour",
+            xaxis_title="Time",
+            yaxis_title="Temperature (°F)",
+            legend_title="Device MAC address",
+        )
+
+        for df in TemperaturePlot.get_dfs_by_device(df):
+            fig.add_trace(
+                go.Scatter(x=df.ts, y=df.temp, name=df.device.iloc[0]),
+            )
+
+        return fig
 
     @staticmethod
-    def plot_all_devices(df: pd.DataFrame):
-        figs = []
+    def get_dfs_by_device(df: pd.DataFrame):
+        dfs_by_device = []
         devices = df.device.unique()
 
         for device in devices:
-            df_by_device = df[df.device == device]
-            figs.append(px.line(df_by_device, x="ts", y="temp"))
+            dfs_by_device.append(df[df.device == device])
 
-        return figs
-
-    @staticmethod
-    def join_plots(figs: "list[go.Figure]") -> go.Figure:
-        combined_figs = figs[0].data
-        for figure in figs[1:]:
-            combined_figs += figure.data
-
-        return go.Figure(data=combined_figs)
+        return dfs_by_device
 
 
 class LastHourTemperaturePlot(TemperaturePlot):
