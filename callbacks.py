@@ -2,6 +2,7 @@ import os
 import pandas as pd
 
 import diskcache
+from datetime import datetime, timedelta
 from dash.long_callback import DiskcacheLongCallbackManager
 
 from sys import platform
@@ -32,10 +33,10 @@ dynamic_callback = app.callback if platform == 'darwin' else app.long_callback
 )
 def update_df(df, start_date, _):
     df = decode_dataframe(df)
-    limit = 500 if df is not None else None
+    limit = 500 if df is not None else 3000
 
     new_df = bq_client.select(
-        "multisensor_data", start_date=start_date, to_df=True, limit=limit
+        os.getenv('BQ_TABLE'), start_date=start_date, to_df=True, limit=limit
     ).drop_duplicates()
 
     start_date = new_df.ts.max()
@@ -66,7 +67,7 @@ def update_temperature_plot(df):
 )
 def update_interval(num_intervals):
     if num_intervals > 0:
-        return 2*1000
+        return 3*1000
 
     return no_update
 
