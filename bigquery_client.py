@@ -24,18 +24,18 @@ class BigQueryClient:
         self.project_id = project_id
         self.dataset = dataset
 
-    def select(self, table: str, columns: "list[str]" = "*", limit=1000, start_date = None, to_df=True):
+    def select(self, table: str, columns: "list[str]" = "*", limit=10000, start_date = None, to_df=True):
         query = f"""\
             SELECT {','.join(columns)}\
             FROM {self.dataset}.{table}\
             {f"WHERE ts > '{start_date}'" if start_date else ''}\
-            ORDER BY ts ASC\
+            ORDER BY ts DESC\
             {f"LIMIT {limit}" if limit else ''}\
         """
 
         if to_df:
-            return pd.read_gbq(query)
+            return pd.read_gbq(query, self.project_id).sort_values(by='ts', ascending=True)
 
-        result = BigQueryResult(self.client.query(query).result())
+        result = BigQueryResult(self.client.query(query, project=self.project_id).result())
 
         return result
