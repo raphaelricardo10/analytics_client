@@ -4,6 +4,8 @@ import pandas as pd
 import diskcache
 from dash.long_callback import DiskcacheLongCallbackManager
 
+from sys import platform
+
 from app import app
 from dash import Output, Input, State, no_update
 
@@ -18,8 +20,9 @@ bq_client = BigQueryClient(
     project_id=os.getenv("PROJECT_ID"), dataset=os.getenv("BQ_DATASET")
 )
 
+dynamic_callback = app.callback if platform == 'darwin' else app.long_callback
 
-@app.long_callback(
+@dynamic_callback(
     Output(component_id="df", component_property="data"),
     Output(component_id="df_start_date", component_property="data"),
     State(component_id="df", component_property="data"),
