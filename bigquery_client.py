@@ -12,9 +12,9 @@ class BigQueryResult:
         return self._rows
 
     def __next__(self):
-        self.current += 1
-        if self.current < len(self._rows):
-            return self.current
+        self._current += 1
+        if self._current < len(self._rows):
+            return self._current
         raise StopIteration
 
 
